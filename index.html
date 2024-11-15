@@ -3,43 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اتصال به کیف پول تون کیپر</title>
-    <!-- لینک به فایل‌های Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>اتصال به Tonkeeper</title>
+    
+    <!-- استفاده از بوت استرپ برای استایل دکمه -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
-            font-family: Tahoma, sans-serif;
             direction: rtl;
-            padding-top: 50px;
+            text-align: right;
+            padding: 20px;
         }
-        .wallet-button {
-            width: 200px;
-            padding: 15px;
+        #connectButton {
             font-size: 18px;
+            padding: 10px 20px;
+            background-color: #ff4747; /* رنگ قرمز */
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        #connectButton:hover {
+            background-color: #ff6f6f;
+        }
+        .alert {
             text-align: center;
+            font-size: 18px;
         }
     </style>
 </head>
 <body>
-    <div class="container text-center">
-        <button id="connect-wallet" class="btn btn-primary wallet-button">اتصال به کیف پول تون کیپر</button>
-        <div id="wallet-status" class="mt-3"></div>
-    </div>
+    <h1>test</h1>
+    <h2>اتصال به کیف پول Tonkeeper</h2>
+    <button id="connectButton" class="btn btn-primary">اتصال به Tonkeeper</button>
+    <div id="errorMessage" class="alert alert-danger" style="display:none;"></div>
+    <div id="successMessage" class="alert alert-success" style="display:none;"></div>
 
-    <!-- اسکریپت‌های JavaScript -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.getElementById("connect-wallet").addEventListener("click", function() {
-            if (window.ton && window.ton.connect) {
-                window.ton.connect().then(function(account) {
-                    document.getElementById("wallet-status").innerHTML = "اتصال با کیف پول موفقیت‌آمیز بود. آدرس حساب: " + account.address;
+        document.getElementById("connectButton").addEventListener("click", function() {
+            // چک می‌کنیم که آیا Tonkeeper در مرورگر نصب است یا خیر
+            if (typeof window.tonkeeper !== "undefined") {
+                // اتصال به کیف پول Tonkeeper
+                window.tonkeeper.request({
+                    method: 'ton_request',
+                    params: {
+                        network: 'mainnet'  // یا testnet بسته به شبکه‌ای که استفاده می‌کنید
+                    }
+                }).then(function(response) {
+                    document.getElementById("successMessage").innerHTML = "اتصال به Tonkeeper با موفقیت انجام شد!";
+                    document.getElementById("successMessage").style.display = "block";
+                    document.getElementById("errorMessage").style.display = "none";
+                    console.log('Connected:', response);  // نمایش پاسخ موفقیت‌آمیز در کنسول
                 }).catch(function(error) {
-                    document.getElementById("wallet-status").innerHTML = "خطا در اتصال به کیف پول: " + error.message;
+                    document.getElementById("errorMessage").innerHTML = "خطا در اتصال به Tonkeeper: " + error.message;
+                    document.getElementById("errorMessage").style.display = "block";
+                    document.getElementById("successMessage").style.display = "none";
+                    console.error('Error:', error);
                 });
             } else {
-                document.getElementById("wallet-status").innerHTML = "کیف پول تون کیپر در مرورگر شما نصب نیست.";
+                // نمایش پیام خطا اگر Tonkeeper نصب نباشد
+                document.getElementById("errorMessage").innerHTML = "کیف پول Tonkeeper در مرورگر شما نصب نیست. لطفا کیف پول را نصب کنید.";
+                document.getElementById("errorMessage").style.display = "block";
+                document.getElementById("successMessage").style.display = "none";
             }
         });
     </script>
+
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.4/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
 </body>
 </html>
