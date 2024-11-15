@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>اتصال به Tonkeeper</title>
-    <!-- استفاده از بوت استرپ برای استایل دکمه -->
+    <title>اتصال به Tonkeeper و نمایش موجودی</title>
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body {
@@ -28,30 +27,43 @@
             text-align: center;
             font-size: 18px;
         }
+        .balance {
+            font-size: 24px;
+            font-weight: bold;
+            color: green;
+        }
     </style>
 </head>
 <body>
 
-    <h2>اتصال به کیف پول Tonkeeper</h2>
+    <h2>اتصال به کیف پول Tonkeeper و نمایش موجودی</h2>
     <button id="connectButton" class="btn btn-primary">اتصال به Tonkeeper</button>
     <div id="errorMessage" class="alert alert-danger" style="display:none;"></div>
     <div id="successMessage" class="alert alert-success" style="display:none;"></div>
+    <div id="balanceContainer" style="display:none;">
+        <p>موجودی کیف پول شما: <span id="walletBalance" class="balance">0</span> TON</p>
+    </div>
 
     <script>
         document.getElementById("connectButton").addEventListener("click", function() {
             // ابتدا چک می‌کنیم که آیا کیف پول Tonkeeper نصب است یا خیر
             if (typeof window.tonkeeper !== "undefined") {
-                // اتصال به کیف پول Tonkeeper
+                // درخواست برای دریافت اطلاعات کیف پول
                 window.tonkeeper.request({
                     method: 'ton_request',
                     params: {
                         network: 'mainnet'  // یا testnet بسته به شبکه‌ای که استفاده می‌کنید
                     }
                 }).then(function(response) {
+                    // اگر درخواست موفق بود، آدرس کیف پول و موجودی آن را دریافت می‌کنیم
+                    const walletAddress = response.address;  // دریافت آدرس کیف پول
                     document.getElementById("successMessage").innerHTML = "اتصال به Tonkeeper با موفقیت انجام شد!";
                     document.getElementById("successMessage").style.display = "block";
                     document.getElementById("errorMessage").style.display = "none";
-                    console.log('Connected:', response);  // نمایش پاسخ موفقیت‌آمیز در کنسول
+                    console.log('Connected:', response);
+                    
+                    // حالا می‌خواهیم موجودی کیف پول را دریافت کنیم
+                    getWalletBalance(walletAddress);
                 }).catch(function(error) {
                     document.getElementById("errorMessage").innerHTML = "خطا در اتصال به Tonkeeper: " + error.message;
                     document.getElementById("errorMessage").style.display = "block";
@@ -74,6 +86,25 @@
                 }, 1000);  // اگر یک ثانیه گذشته و کیف پول باز نشد، خطا نشان داده می‌شود
             }
         });
+
+        // این تابع موجودی کیف پول را با استفاده از آدرس آن دریافت می‌کند
+        function getWalletBalance(address) {
+            // برای دریافت موجودی، از API‌های بلاکچین باید استفاده کنید. فرض کنید ما از API عمومی استفاده می‌کنیم.
+            const apiUrl = `https://tonapi.io/get_balance?address=${address}`;  // آدرس فرضی برای دریافت موجودی
+            fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    // فرض می‌کنیم که موجودی به فرمت TON است
+                    const balance = data.balance;
+                    document.getElementById("walletBalance").innerText = balance + " TON";
+                    document.getElementById("balanceContainer").style.display = "block";
+                })
+                .catch(error => {
+                    console.error('Error fetching balance:', error);
+                    document.getElementById("errorMessage").innerHTML = "خطا در دریافت موجودی کیف پول.";
+                    document.getElementById("errorMessage").style.display = "block";
+                });
+        }
     </script>
 
     <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
