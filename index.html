@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>اتصال به Tonkeeper</title>
-    
     <!-- استفاده از بوت استرپ برای استایل دکمه -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <style>
@@ -32,7 +31,7 @@
     </style>
 </head>
 <body>
-    <h1>test</h1>
+
     <h2>اتصال به کیف پول Tonkeeper</h2>
     <button id="connectButton" class="btn btn-primary">اتصال به Tonkeeper</button>
     <div id="errorMessage" class="alert alert-danger" style="display:none;"></div>
@@ -40,7 +39,7 @@
 
     <script>
         document.getElementById("connectButton").addEventListener("click", function() {
-            // چک می‌کنیم که آیا Tonkeeper در مرورگر نصب است یا خیر
+            // ابتدا چک می‌کنیم که آیا کیف پول Tonkeeper نصب است یا خیر
             if (typeof window.tonkeeper !== "undefined") {
                 // اتصال به کیف پول Tonkeeper
                 window.tonkeeper.request({
@@ -60,10 +59,19 @@
                     console.error('Error:', error);
                 });
             } else {
-                // نمایش پیام خطا اگر Tonkeeper نصب نباشد
-                document.getElementById("errorMessage").innerHTML = "کیف پول Tonkeeper در مرورگر شما نصب نیست. لطفا کیف پول را نصب کنید.";
-                document.getElementById("errorMessage").style.display = "block";
-                document.getElementById("successMessage").style.display = "none";
+                // اگر Tonkeeper نصب نیست، به صورت مستقیم از deep link استفاده می‌کنیم
+                const tonkeeperUrl = 'ton://';  // deep link برای اتصال به Tonkeeper
+                let startTime = new Date().getTime();
+                window.location.href = tonkeeperUrl;  // سعی می‌کنیم کیف پول را باز کنیم
+                setTimeout(function() {
+                    // اگر کیف پول باز نشد (زمانی که نصب نباشد)، پیام خطا نشان داده می‌شود
+                    let endTime = new Date().getTime();
+                    if (endTime - startTime < 1000) {  // اگر زمان کوتاه باشد، یعنی هیچ اتفاقی نیافتاده است
+                        document.getElementById("errorMessage").innerHTML = "کیف پول Tonkeeper در مرورگر شما نصب نیست. لطفا کیف پول را نصب کنید.";
+                        document.getElementById("errorMessage").style.display = "block";
+                        document.getElementById("successMessage").style.display = "none";
+                    }
+                }, 1000);  // اگر یک ثانیه گذشته و کیف پول باز نشد، خطا نشان داده می‌شود
             }
         });
     </script>
